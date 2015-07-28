@@ -46,6 +46,7 @@ var ChartEditor = function () {
     registerChartType("bar", require('./chart-type-bar.js'));
     registerChartType("verticalbar", require('./chart-type-vertical-bar'));
     registerChartType("bubble", require('./chart-type-bubble'));
+    registerChartType("echart-line", require('./chart-type-echart-line'));
     
     
     this.buildChartUI = function () {
@@ -194,7 +195,8 @@ var ChartEditor = function () {
     $btnSaveImage.click(me.saveImage);
     $chartTypeDropDown.change(me.buildChartUI);
     $(window).resize(function () {
-        if (gchart) gchart.draw(0, true);
+        if (gchart && gchart.draw) gchart.draw(0, true); // dimplejs
+        if (gchart && gchart.resize) gchart.resize(); // echarts
     });
 };
 module.exports = ChartEditor;
