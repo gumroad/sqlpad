@@ -4,6 +4,7 @@ var uuid = require('uuid');
 var noop = function () {
 };
 var moment = require('moment');
+var request = require('request');
 
 module.exports = function (app) {
 
@@ -22,6 +23,22 @@ module.exports = function (app) {
                 res.locals.tags = tags;
                 next();
             });
+        });
+    }
+
+    // Post to a slack webhook
+    function pushQueryToSlack(query, userEmail, webhookUrl, cb){
+        var options = {
+          method: 'post',
+          body: {"text": "New Query <" + process.env.PUBLIC_URL +
+                         "/queries/" + query._id + "|"+ query.name +
+                         "> saved by " + userEmail + " on SqlPad ```" +
+                         query.queryText + "```"},
+          json: true,
+          url: webhookUrl
+        }
+        request(options, function(err, httpResponse, body){
+            cb(err);
         });
     }
     
@@ -132,19 +149,32 @@ module.exports = function (app) {
             queryText: req.body.queryText,
             chartConfiguration: req.body.chartConfiguration,
             modifiedDate: new Date(),
-            modifiedBy: req.session.email,
+            modifiedBy: req.user.email,
             lastAccessedDate: new Date()
         };
         if (req.params._id == "new") {
             bodyQuery.createdDate = new Date();
-            bodyQuery.createdBy = req.session.email;
+            bodyQuery.createdBy = req.user.email;
 
             db.queries.insert(bodyQuery, function (err, query) {
                 if (err) {
                     console.log(err);
                     res.send({err: err, success: false});
                 } else {
-                    res.send({success: true, query: query});
+                    db.config.findOne({ key: "slackWebhook"}, function(err, webhook){
+                        if (err) console.log(err);
+                        if (!webhook) {
+                            // if not configured, just return success response
+                            res.send({success:true, query: query});
+                        } else {
+                            pushQueryToSlack(query, req.user.email, webhook.value, function(err){
+                                if (err) console.log("Something went wrong while sending to Slack.")
+                                else {
+                                    res.send({success: true, query: query});
+                                }
+                             });
+                        }
+                    });
                 }
             });
         } else {

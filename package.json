@@ -1,6 +1,6 @@
 {
   "name": "sqlpad",
-  "version": "1.7.0",
+  "version": "1.8.0",
   "description": "Web app for writing and running SQL queries and visualizing the results. Supports Postgres, MySQL, and SQL Server.",
   "license": "MIT",
   "author": {
@@ -30,9 +30,11 @@
   "dependencies": {
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "1.2.x",
+    "connect-flash": "^0.1.1",
     "cookie-parser": "1.1.x",
     "cookie-session": "1.0.x",
     "ejs": "1.0.x",
+    "errorhandler": "^1.4.0",
     "express": "4.x.x",
     "json2csv": "2.2.x",
     "keymaster": "^1.6.2",
@@ -43,9 +45,13 @@
     "mssql": "1.x.x",
     "mysql": "2.x.x",
     "nedb": "1.x.x",
+    "passport": "^0.2.2",
+    "passport-google-oauth2": "^0.1.6",
+    "passport-local": "^1.0.0",
     "pg": "^4.1.0",
     "pg-cursor": "^1.0.0",
     "rc": "^0.5.4",
+    "request": "^2.58.0",
     "sanitize-filename": "1.1.x",
     "serve-favicon": "2.0.x",
     "ua-parser": "0.3.x",

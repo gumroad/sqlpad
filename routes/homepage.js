@@ -7,12 +7,16 @@
 ============================================================================= */
 module.exports = function (app) {
     var db = app.get('db');
-    app.get('/', function(req, res){
+    app.get('/', function(req, res) {
+        var connectionExists = false;
         db.connections.findOne({}, function (err, doc) {
             if (doc) {
-                res.redirect('/queries');
-            } else {
+                connectionExists = true;
+            }
+            if (!connectionExists && res.locals.user.admin) {
                 res.redirect('/connections');
+            } else {
+                res.redirect('/queries');
             }
         });
     });  
