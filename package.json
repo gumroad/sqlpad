@@ -81,6 +81,8 @@
     "saveSvgAsPng": "global:saveSvgAsPng",
     "Bloodhound": "global:Bloodhound",
     "echarts": "global:echarts",
-    "MG": "global:MG"
+    "MG": "global:MG",
+    "tauCharts": "global:tauCharts",
+    "_": "global:_"
   }
 }

@@ -48,7 +48,7 @@ var ChartEditor = function () {
     registerChartType("bubble", require('./chart-type-bubble'));
     registerChartType("echart-line", require('./chart-type-echart-line'));
     registerChartType("metricsgraphics-line", require('./chart-type-metricsgraphics-line'));
-    
+    registerChartType("taucharts-line", require('./chart-type-tauCharts-line'));
     
     this.buildChartUI = function () {
         var selectedChartType = $chartTypeDropDown.val();

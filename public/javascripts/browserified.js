@@ -316,7 +316,7 @@ module.exports =  {
         */
     }
 };
-},{"lodash":19}],4:[function(require,module,exports){
+},{"lodash":20}],4:[function(require,module,exports){
 var dimple = (window.dimple);
 
 module.exports =  {
@@ -490,7 +490,90 @@ module.exports =  {
         return true;
     }
 };
-},{"lodash":19}],6:[function(require,module,exports){
+},{"lodash":20}],6:[function(require,module,exports){
+var tauCharts = (window.tauCharts);
+var _ = require('lodash');
+var $ = (window.$);
+
+module.exports =  {
+    chartLabel: "tauCharts - Line",
+    fields: {
+        x: {
+            required: true,
+            label: "x",
+            inputType: "field-dropdown",
+            $input: null,
+            val: null,
+            datatype: null,
+            min: null,
+            max: null
+        },
+        y: { 
+            required: true,
+            label: "y",
+            inputType: "field-dropdown"
+        },
+        split: {
+            required: false,
+            label: "line for each:",
+            inputType: "field-dropdown"
+        }
+    },
+    renderChart: function (meta, data, fields) {
+        
+        $('#chart').empty();
+        
+        var width = $('#chart').width();
+        var height = $('#chart').height() - 140;
+        
+        if (fields.x.datatype == "date" || fields.x.datatype == "number") {
+            
+        } else {
+            alert("x should be date or number");
+        }
+        
+        for (var row in data) {
+            data[row][fields.y.val] = Number(data[row][fields.y.val]);
+        }
+        
+        var lineForEach = fields.split.val;
+        if (lineForEach) {
+            
+            var chart = new tauCharts.Chart({
+                data: data,
+                type: 'line',
+                x: fields.x.val,
+                y: fields.y.val,
+                color: lineForEach, // there will be two lines with different colors on the chart
+                plugins: [
+                    tauCharts.api.plugins.get('tooltip')({fields: [fields.x.val, fields.y.val, lineForEach]}),
+                    tauCharts.api.plugins.get('legend')()
+                ]
+                
+            });
+            chart.renderTo('#chart');
+            
+        } else {
+            
+            var chart = new tauCharts.Chart({
+                data: data,
+                type: 'line',
+                x: fields.x.val,
+                y: fields.y.val,
+                plugins: [
+                    tauCharts.api.plugins.get('tooltip')({fields: [fields.x.val, fields.y.val]}),
+                    tauCharts.api.plugins.get('legend')()
+                ]
+            });
+            chart.renderTo('#chart');
+            
+        }
+        
+        
+        return true;
+    }
+};
+},{"lodash":20}],7:[function(require,module,exports){
 var dimple = (window.dimple);
 
 module.exports =  {
@@ -574,7 +657,7 @@ module.exports =  {
         return myChart;
     }
 };
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 var $ = (window.$);
 var ace = (window.ace);
 
@@ -617,7 +700,7 @@ module.exports = function (id) {
     
     $(window).resize(me.resize);
 };
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 /*
 
 "component" for chart editor
@@ -668,7 +751,7 @@ var ChartEditor = function () {
     registerChartType("bubble", require('./chart-type-bubble'));
     registerChartType("echart-line", require('./chart-type-echart-line'));
     registerChartType("metricsgraphics-line", require('./chart-type-metricsgraphics-line'));
-    
+    registerChartType("taucharts-line", require('./chart-type-tauCharts-line'));
     
     this.buildChartUI = function () {
         var selectedChartType = $chartTypeDropDown.val();
@@ -822,7 +905,7 @@ var ChartEditor = function () {
 };
 module.exports = ChartEditor;
 
-},{"./chart-type-bar.js":1,"./chart-type-bubble":2,"./chart-type-echart-line":3,"./chart-type-line.js":4,"./chart-type-metricsgraphics-line":5,"./chart-type-vertical-bar":6}],9:[function(require,module,exports){
+},{"./chart-type-bar.js":1,"./chart-type-bubble":2,"./chart-type-echart-line":3,"./chart-type-line.js":4,"./chart-type-metricsgraphics-line":5,"./chart-type-tauCharts-line":6,"./chart-type-vertical-bar":7}],10:[function(require,module,exports){
 var $ = (window.$);
 var Slick = (window.Slick);
 var moment = require('moment');
@@ -927,7 +1010,7 @@ module.exports = function () {
     
     $(window).resize(me.resize);
 };
-},{"moment":20}],10:[function(require,module,exports){
+},{"moment":21}],11:[function(require,module,exports){
 /*
 
  "component" for db schema info
@@ -993,7 +1076,7 @@ DbInfo.prototype.getSchema = function (reload) {
         });
     }
 };
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 var $ = (window.$);
 
 module.exports = function () {
@@ -1007,7 +1090,7 @@ module.exports = function () {
         }
     });
 };
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 var $ = (window.$);
 
 module.exports = function () {
@@ -1021,7 +1104,7 @@ module.exports = function () {
         }
     });
 }
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 var $ = (window.$);
 
 function renderFailure (text) {
@@ -1079,7 +1162,7 @@ module.exports = function () {
         });
     });
 };
-},{}],14:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 //  This is where all the client side js stuff is required so it can be bundled 
 //  via Browserify. 
 //  All the heavy old-school javascript libraries are exposed as browserify globals
@@ -1099,7 +1182,7 @@ require('./query-filter-form.js')();
 
 // All the stuff that happens when viewing/working with a single query happens here
 require('./query-editor.js')();
-},{"./configs.js":11,"./connection-admin.js":12,"./connection.js":13,"./query-editor.js":15,"./query-filter-form.js":16,"./user-admin.js":17}],15:[function(require,module,exports){
+},{"./configs.js":12,"./connection-admin.js":13,"./connection.js":14,"./query-editor.js":16,"./query-filter-form.js":17,"./user-admin.js":18}],16:[function(require,module,exports){
 var $ = (window.$);
 var keymaster = require('keymaster');
 var ChartEditor = require('./component-chart-editor.js');
@@ -1279,7 +1362,7 @@ module.exports = function () {
         new QueryEditor();
     }
 };
-},{"./component-ace-sql-editor.js":7,"./component-chart-editor.js":8,"./component-data-grid.js":9,"./component-db-info.js":10,"keymaster":18}],16:[function(require,module,exports){
+},{"./component-ace-sql-editor.js":8,"./component-chart-editor.js":9,"./component-data-grid.js":10,"./component-db-info.js":11,"keymaster":19}],17:[function(require,module,exports){
 var $ = (window.$);
 
 module.exports = function () {
@@ -1309,7 +1392,7 @@ module.exports = function () {
         }
     });
 }
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 var $ = (window.$);
 
 module.exports = function () {
@@ -1323,7 +1406,7 @@ module.exports = function () {
         }
     });
 }
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 //     keymaster.js
 //     (c) 2011-2013 Thomas Fuchs
 //     keymaster.js may be freely distributed under the MIT license.
@@ -1621,7 +1704,7 @@ module.exports = function () {
 
 })(this);
 
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -8410,7 +8493,7 @@ module.exports = function () {
 }.call(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],20:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 (function (global){
 //! moment.js
 //! version : 2.8.4
@@ -11350,4 +11433,4 @@ module.exports = function () {
 }).call(this);
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[14])
+},{}]},{},[15])
