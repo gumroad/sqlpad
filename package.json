@@ -80,6 +80,7 @@
     "dimple": "global:dimple",
     "saveSvgAsPng": "global:saveSvgAsPng",
     "Bloodhound": "global:Bloodhound",
-    "echarts": "global:echarts"
+    "echarts": "global:echarts",
+    "MG": "global:MG"
   }
 }

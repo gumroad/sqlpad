@@ -198,9 +198,8 @@ module.exports =  {
             animation: false,
             xAxis : [
                 {
-                    type : xAxisType
-                    //,
-                    //splitNumber:10
+                    type : xAxisType,
+                    splitNumber:10
                 }
             ],
             yAxis : [
@@ -317,7 +316,7 @@ module.exports =  {
         */
     }
 };
-},{"lodash":18}],4:[function(require,module,exports){
+},{"lodash":19}],4:[function(require,module,exports){
 var dimple = (window.dimple);
 
 module.exports =  {
@@ -369,6 +368,129 @@ module.exports =  {
     }
 };
 },{}],5:[function(require,module,exports){
+var MG = (window.MG);
+var _ = require('lodash');
+var $ = (window.$);
+
+module.exports =  {
+    chartLabel: "MetricsGraphics - Line",
+    fields: {
+        x: {
+            required: true,
+            label: "x",
+            inputType: "field-dropdown",
+            $input: null,
+            val: null,
+            datatype: null,
+            min: null,
+            max: null
+        },
+        y: { 
+            required: true,
+            label: "y",
+            inputType: "field-dropdown"
+        },
+        split: {
+            required: false,
+            label: "line for each:",
+            inputType: "field-dropdown"
+        }
+    },
+    renderChart: function (meta, data, fields) {
+        
+        var width = $('#chart').width();
+        var height = $('#chart').height() - 140;
+        
+        if (fields.x.datatype == "date" || fields.x.datatype == "number") {
+            
+        } else {
+            alert("x should be date or number");
+        }
+        
+        // massage data for MG formats
+        var lineForEach = fields.split.val;
+        var mgData = [];
+        if (lineForEach) {
+            
+            /*
+            data needs to be like
+            [
+                [
+                    {date: 'date value', value: 42}
+                    {date: 'date value', value: 42},
+                ],
+                [
+                    {date: 'date value', value: 42},
+                    {date: 'date value', value: 42}
+                ]
+            ]
+            */
+            
+            var lines = []; // array of line names for legend purposes
+            var indexed = _.groupBy(data, lineForEach);
+            for (var eachLine in indexed) {
+                lines.push(eachLine);
+                var mgDataSeries = [];
+                var subdataset = indexed[eachLine];
+                if (subdataset && subdataset.length) {
+                    for (var i = 0; i < subdataset.length; i++) {
+                        mgDataSeries.push({
+                            date: new Date(subdataset[i][fields.x.val]),
+                            value: Number(subdataset[i][fields.y.val])
+                        });
+                    }
+                    mgData.push(mgDataSeries);
+                }
+            }
+            
+            var colormap = [];
+            for (var line in lines) {
+                colormap.push(1);
+            }
+            
+            console.log(lines);
+            console.log(colormap);
+            console.log(mgData);
+            
+            MG.data_graphic({
+                title: "Multi-Line Chart",
+                description: "This line chart contains multiple lines.",
+                data: mgData,
+                width: width,
+                height: height,
+                right: 140,
+                target: '#chart',
+                legend: lines
+                //legend_target: '.legend'
+            });
+        } else {
+            
+            var mgDataSeries = [];
+            if (data && data.length) {
+                for (var i = 0; i < data.length; i++) {
+                    mgDataSeries.push({
+                        date: data[i][fields.x.val],
+                        value: Number(data[i][fields.y.val])
+                    });
+                }
+            }
+            
+            MG.data_graphic({
+                data: mgDataSeries,
+                width: width,
+                height: height,
+                right: 40,
+                target: '#chart'
+                //,
+                //legend_target: '.legend'
+            });
+        }
+        
+        
+        return true;
+    }
+};
+},{"lodash":19}],6:[function(require,module,exports){
 var dimple = (window.dimple);
 
 module.exports =  {
@@ -452,7 +574,7 @@ module.exports =  {
         return myChart;
     }
 };
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 var $ = (window.$);
 var ace = (window.ace);
 
@@ -495,7 +617,7 @@ module.exports = function (id) {
     
     $(window).resize(me.resize);
 };
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 /*
 
 "component" for chart editor
@@ -545,6 +667,7 @@ var ChartEditor = function () {
     registerChartType("verticalbar", require('./chart-type-vertical-bar'));
     registerChartType("bubble", require('./chart-type-bubble'));
     registerChartType("echart-line", require('./chart-type-echart-line'));
+    registerChartType("metricsgraphics-line", require('./chart-type-metricsgraphics-line'));
     
     
     this.buildChartUI = function () {
@@ -677,6 +800,7 @@ var ChartEditor = function () {
         // for the saveSvgAsPng to work,
         // height and width must be pixels in the style attribute
         // height and width attributes must be removed
+        
         var $svg = $('#svgchart');
         var width = $svg.width();
         var height = $svg.height();
@@ -686,6 +810,18 @@ var ChartEditor = function () {
         // Cheating for now and just referencing element directly
         var imageName = $('#header-query-name').val();
         saveSvgAsPng(document.getElementById("svgchart"), imageName + ".png");
+        
+        /*
+        var $svg = $('#chart').find('svg').first();
+        var width = $svg.width();
+        var height = $svg.height();
+        $svg.attr("style", "width: " + width + "; height:" + height + ";");
+        $svg.attr("width", null);
+        $svg.attr("height", null);
+        // Cheating for now and just referencing element directly
+        var imageName = $('#header-query-name').val();
+        saveSvgAsPng($svg.get(0), imageName + ".png");
+        */
     };
     
     // Bind Events
@@ -699,7 +835,7 @@ var ChartEditor = function () {
 };
 module.exports = ChartEditor;
 
-},{"./chart-type-bar.js":1,"./chart-type-bubble":2,"./chart-type-echart-line":3,"./chart-type-line.js":4,"./chart-type-vertical-bar":5}],8:[function(require,module,exports){
+},{"./chart-type-bar.js":1,"./chart-type-bubble":2,"./chart-type-echart-line":3,"./chart-type-line.js":4,"./chart-type-metricsgraphics-line":5,"./chart-type-vertical-bar":6}],9:[function(require,module,exports){
 var $ = (window.$);
 var Slick = (window.Slick);
 var moment = require('moment');
@@ -804,7 +940,7 @@ module.exports = function () {
     
     $(window).resize(me.resize);
 };
-},{"moment":19}],9:[function(require,module,exports){
+},{"moment":20}],10:[function(require,module,exports){
 /*
 
  "component" for db schema info
@@ -870,7 +1006,7 @@ DbInfo.prototype.getSchema = function (reload) {
         });
     }
 };
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 var $ = (window.$);
 
 module.exports = function () {
@@ -884,7 +1020,7 @@ module.exports = function () {
         }
     });
 };
-},{}],11:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 var $ = (window.$);
 
 module.exports = function () {
@@ -898,7 +1034,7 @@ module.exports = function () {
         }
     });
 }
-},{}],12:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 var $ = (window.$);
 
 function renderFailure (text) {
@@ -956,7 +1092,7 @@ module.exports = function () {
         });
     });
 };
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 //  This is where all the client side js stuff is required so it can be bundled 
 //  via Browserify. 
 //  All the heavy old-school javascript libraries are exposed as browserify globals
@@ -976,7 +1112,7 @@ require('./query-filter-form.js')();
 
 // All the stuff that happens when viewing/working with a single query happens here
 require('./query-editor.js')();
-},{"./configs.js":10,"./connection-admin.js":11,"./connection.js":12,"./query-editor.js":14,"./query-filter-form.js":15,"./user-admin.js":16}],14:[function(require,module,exports){
+},{"./configs.js":11,"./connection-admin.js":12,"./connection.js":13,"./query-editor.js":15,"./query-filter-form.js":16,"./user-admin.js":17}],15:[function(require,module,exports){
 var $ = (window.$);
 var keymaster = require('keymaster');
 var ChartEditor = require('./component-chart-editor.js');
@@ -1156,7 +1292,7 @@ module.exports = function () {
         new QueryEditor();
     }
 };
-},{"./component-ace-sql-editor.js":6,"./component-chart-editor.js":7,"./component-data-grid.js":8,"./component-db-info.js":9,"keymaster":17}],15:[function(require,module,exports){
+},{"./component-ace-sql-editor.js":7,"./component-chart-editor.js":8,"./component-data-grid.js":9,"./component-db-info.js":10,"keymaster":18}],16:[function(require,module,exports){
 var $ = (window.$);
 
 module.exports = function () {
@@ -1186,7 +1322,7 @@ module.exports = function () {
         }
     });
 }
-},{}],16:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 var $ = (window.$);
 
 module.exports = function () {
@@ -1200,7 +1336,7 @@ module.exports = function () {
         }
     });
 }
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 //     keymaster.js
 //     (c) 2011-2013 Thomas Fuchs
 //     keymaster.js may be freely distributed under the MIT license.
@@ -1498,7 +1634,7 @@ module.exports = function () {
 
 })(this);
 
-},{}],18:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 (function (global){
 /**
  * @license
@@ -8287,7 +8423,7 @@ module.exports = function () {
 }.call(this));
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],19:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 (function (global){
 //! moment.js
 //! version : 2.8.4
@@ -11227,4 +11363,4 @@ module.exports = function () {
 }).call(this);
 
 }).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[13])
+},{}]},{},[14])

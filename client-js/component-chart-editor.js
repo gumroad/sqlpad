@@ -47,6 +47,7 @@ var ChartEditor = function () {
     registerChartType("verticalbar", require('./chart-type-vertical-bar'));
     registerChartType("bubble", require('./chart-type-bubble'));
     registerChartType("echart-line", require('./chart-type-echart-line'));
+    registerChartType("metricsgraphics-line", require('./chart-type-metricsgraphics-line'));
     
     
     this.buildChartUI = function () {
@@ -179,6 +180,7 @@ var ChartEditor = function () {
         // for the saveSvgAsPng to work,
         // height and width must be pixels in the style attribute
         // height and width attributes must be removed
+        
         var $svg = $('#svgchart');
         var width = $svg.width();
         var height = $svg.height();
@@ -188,6 +190,18 @@ var ChartEditor = function () {
         // Cheating for now and just referencing element directly
         var imageName = $('#header-query-name').val();
         saveSvgAsPng(document.getElementById("svgchart"), imageName + ".png");
+        
+        /*
+        var $svg = $('#chart').find('svg').first();
+        var width = $svg.width();
+        var height = $svg.height();
+        $svg.attr("style", "width: " + width + "; height:" + height + ";");
+        $svg.attr("width", null);
+        $svg.attr("height", null);
+        // Cheating for now and just referencing element directly
+        var imageName = $('#header-query-name').val();
+        saveSvgAsPng($svg.get(0), imageName + ".png");
+        */
     };
     
     // Bind Events
