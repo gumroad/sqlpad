@@ -10,12 +10,14 @@ var chartEditor = new ChartEditor();
 */
 var saveSvgAsPng = require('saveSvgAsPng');
 var $ = require('jquery');
+var _ = require('lodash');
 
 var ChartEditor = function () {
     var me = this;
     var gchart;
     var gdata;
     var gmeta;
+    var fieldValueCache = {};
     var chartTypes = {}; // holds chart types once registered
     var chartLabels = []; // array of chart labels for sorting/serving as a record of labels
     var chartTypeKeyByChartLabel = {}; // index of chart types by chartlabel
@@ -82,10 +84,12 @@ var ChartEditor = function () {
                 field.$input = $input;
             }
         }
+        setChartTypeFieldValues(selectedChartType, fieldValueCache);
     };
     
     this.getChartConfiguration = function () {
         /*
+            // Expected output:
             {
                 chartType: "line",
                 fields: {
@@ -108,32 +112,44 @@ var ChartEditor = function () {
         return chartConfig;
     };
     
+    // Whenever the chart type dropdown is focused on
+    // we should cache the chart config field values
+    // we'll re-apply any values that make sense if the chart type changes
+    this.cacheChartConfigFieldValues = function () {
+        var chartConfig = me.getChartConfiguration();
+        _.merge(fieldValueCache, chartConfig.fields);
+        console.log(fieldValueCache);
+    };
+    
     this.loadChartConfiguration = function (config) {
         // set chart type dropdown
         // fire .buildChartUI
         // loop through chart types and set their values
+        var chartType = config.chartType;
+        var fieldValues = config.fields;
         $chartTypeDropDown.val(config.chartType);
-        $chartTypeDropDown.trigger("change");
-        if (chartTypes[config.chartType]) {
-            var ct = chartTypes[config.chartType];
+        $chartTypeDropDown.trigger("change"); // this builds out the UI
+        setChartTypeFieldValues(chartType, fieldValues);
+    };
+    
+    function setChartTypeFieldValues (chartType, fieldValues) {
+        if (chartTypes[chartType]) {
+            var ct = chartTypes[chartType];
             for (var f in ct.fields) {
-                if (config.fields[f]) {
+                if (fieldValues[f]) {
                     // attempt to set the value of what is in the config
-                    ct.fields[f].$input.val(config.fields[f]);
+                    ct.fields[f].$input.val(fieldValues[f]);
                     // check the value
                     var inputVal = ct.fields[f].$input.val();
                     // if the value is nothing, then we will force it
                     if (!inputVal) {
-                        console.log('in the thing');
-                        console.log(ct.fields[f]);
-                        console.log(config.fields[f]);
-                        ct.fields[f].$input.append('<option value="' + config.fields[f] + '">' + config.fields[f] + '</option>');
-                        ct.fields[f].$input.val(config.fields[f]);
+                        ct.fields[f].$input.append('<option value="' + fieldValues[f] + '">' + fieldValues[f] + '</option>');
+                        ct.fields[f].$input.val(fieldValues[f]);
                     }
                 }
             }
         }
-    };
+    }
     
     this.rerenderChart = function () {
         var chartConfig = me.getChartConfiguration();
@@ -195,6 +211,7 @@ var ChartEditor = function () {
     $btnVisualize.click(me.renderChart);
     $btnSaveImage.click(me.saveImage);
     $chartTypeDropDown.change(me.buildChartUI);
+    $chartTypeDropDown.focus(me.cacheChartConfigFieldValues);
     $(window).resize(function () {
         if (gchart && gchart.draw) gchart.draw(0, true); // dimplejs
         if (gchart && gchart.resize) gchart.resize(); // echarts

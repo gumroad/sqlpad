@@ -30,9 +30,6 @@ module.exports =  {
         
         $('#chart').empty();
         
-        var width = $('#chart').width();
-        var height = $('#chart').height() - 140;
-        
         if (fields.x.datatype == "date" || fields.x.datatype == "number") {
             
         } else {

@@ -1,4 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var dimple = (window.dimple);
 
 module.exports =  {
@@ -523,9 +523,6 @@ module.exports =  {
         
         $('#chart').empty();
         
-        var width = $('#chart').width();
-        var height = $('#chart').height() - 140;
-        
         if (fields.x.datatype == "date" || fields.x.datatype == "number") {
             
         } else {
@@ -713,12 +710,14 @@ var chartEditor = new ChartEditor();
 */
 var saveSvgAsPng = (window.saveSvgAsPng);
 var $ = (window.$);
+var _ = require('lodash');
 
 var ChartEditor = function () {
     var me = this;
     var gchart;
     var gdata;
     var gmeta;
+    var fieldValueCache = {};
     var chartTypes = {}; // holds chart types once registered
     var chartLabels = []; // array of chart labels for sorting/serving as a record of labels
     var chartTypeKeyByChartLabel = {}; // index of chart types by chartlabel
@@ -785,10 +784,12 @@ var ChartEditor = function () {
                 field.$input = $input;
             }
         }
+        setChartTypeFieldValues(selectedChartType, fieldValueCache);
     };
     
     this.getChartConfiguration = function () {
         /*
+            // Expected output:
             {
                 chartType: "line",
                 fields: {
@@ -811,32 +812,44 @@ var ChartEditor = function () {
         return chartConfig;
     };
     
+    // Whenever the chart type dropdown is focused on
+    // we should cache the chart config field values
+    // we'll re-apply any values that make sense if the chart type changes
+    this.cacheChartConfigFieldValues = function () {
+        var chartConfig = me.getChartConfiguration();
+        _.merge(fieldValueCache, chartConfig.fields);
+        console.log(fieldValueCache);
+    };
+    
     this.loadChartConfiguration = function (config) {
         // set chart type dropdown
         // fire .buildChartUI
         // loop through chart types and set their values
+        var chartType = config.chartType;
+        var fieldValues = config.fields;
         $chartTypeDropDown.val(config.chartType);
-        $chartTypeDropDown.trigger("change");
-        if (chartTypes[config.chartType]) {
-            var ct = chartTypes[config.chartType];
+        $chartTypeDropDown.trigger("change"); // this builds out the UI
+        setChartTypeFieldValues(chartType, fieldValues);
+    };
+    
+    function setChartTypeFieldValues (chartType, fieldValues) {
+        if (chartTypes[chartType]) {
+            var ct = chartTypes[chartType];
             for (var f in ct.fields) {
-                if (config.fields[f]) {
+                if (fieldValues[f]) {
                     // attempt to set the value of what is in the config
-                    ct.fields[f].$input.val(config.fields[f]);
+                    ct.fields[f].$input.val(fieldValues[f]);
                     // check the value
                     var inputVal = ct.fields[f].$input.val();
                     // if the value is nothing, then we will force it
                     if (!inputVal) {
-                        console.log('in the thing');
-                        console.log(ct.fields[f]);
-                        console.log(config.fields[f]);
-                        ct.fields[f].$input.append('<option value="' + config.fields[f] + '">' + config.fields[f] + '</option>');
-                        ct.fields[f].$input.val(config.fields[f]);
+                        ct.fields[f].$input.append('<option value="' + fieldValues[f] + '">' + fieldValues[f] + '</option>');
+                        ct.fields[f].$input.val(fieldValues[f]);
                     }
                 }
             }
         }
-    };
+    }
     
     this.rerenderChart = function () {
         var chartConfig = me.getChartConfiguration();
@@ -898,6 +911,7 @@ var ChartEditor = function () {
     $btnVisualize.click(me.renderChart);
     $btnSaveImage.click(me.saveImage);
     $chartTypeDropDown.change(me.buildChartUI);
+    $chartTypeDropDown.focus(me.cacheChartConfigFieldValues);
     $(window).resize(function () {
         if (gchart && gchart.draw) gchart.draw(0, true); // dimplejs
         if (gchart && gchart.resize) gchart.resize(); // echarts
@@ -905,7 +919,7 @@ var ChartEditor = function () {
 };
 module.exports = ChartEditor;
 
-},{"./chart-type-bar.js":1,"./chart-type-bubble":2,"./chart-type-echart-line":3,"./chart-type-line.js":4,"./chart-type-metricsgraphics-line":5,"./chart-type-tauCharts-line":6,"./chart-type-vertical-bar":7}],10:[function(require,module,exports){
+},{"./chart-type-bar.js":1,"./chart-type-bubble":2,"./chart-type-echart-line":3,"./chart-type-line.js":4,"./chart-type-metricsgraphics-line":5,"./chart-type-tauCharts-line":6,"./chart-type-vertical-bar":7,"lodash":20}],10:[function(require,module,exports){
 var $ = (window.$);
 var Slick = (window.Slick);
 var moment = require('moment');
@@ -8492,7 +8506,7 @@ module.exports = function () {
   }
 }.call(this));
 
-}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],21:[function(require,module,exports){
 (function (global){
 //! moment.js
@@ -11432,5 +11446,5 @@ module.exports = function () {
     }
 }).call(this);
 
-}).call(this,typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}]},{},[15])
+}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
+},{}]},{},[15]);
